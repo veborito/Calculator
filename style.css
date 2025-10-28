@@ -1,0 +1,42 @@
+body {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: center;
+  justify-items: center;
+}
+
+#container {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  height: 650px;
+  width: 400px;
+  padding: 10px;
+  border: solid;
+}
+
+#screen {
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 40px;
+}
+
+.line {
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: space-around;
+  align-content: space-evenly;
+  background-color: aliceblue;
+}
+
+.box {
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: center;
+  align-items: center;
+  background-color: aqua;
+}
