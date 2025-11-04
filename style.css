@@ -33,7 +33,7 @@ body {
   background-color: aliceblue;
 }
 
-.box {
+.number, .operator{
   display: flex;
   flex: 1 1 auto;
   justify-content: center;
