@@ -37,21 +37,89 @@ function operate(operator, a, b) {
   }  
 }
 
-function show_result(is_float, result) {
-  if (is_float) {
+function show_result(isFloat, result) {
+  if (isFloat) {
     return Math.round(result * 1000) / 1000;
   } else {
     return result;  
   }
 }
 
-function parseInput(is_float, input) {
-  if (is_float) {
+function parseInput(isFloat, input) {
+  if (isFloat) {
     return parseFloat(input);
   } else {
     return parseInt(input);
   }
 }
+
+function process_calculations(operator){
+  isOperatorClicked = true;
+  if (precNumber == null) {
+    precNumber = currNumber;
+    precOperator = operator;
+  } else if (isNumberClicked) {
+    if (!precOperator)
+      precOperator = operator;
+    let result = operate(precOperator, precNumber, currNumber);
+    if (result == "error") {
+      precNumber = null;
+      currNumber = null;
+    } else {
+      precNumber = result;
+      precOperator = operator;
+    }
+    display.textContent = show_result(isFloat, result);
+  } else {
+    precOperator = operator;
+  }
+  isFloat = false;
+}
+
+function process_operator(operator) {
+    if (operator == "clear") {
+      display.textContent = "";
+      currNumber = null
+      precNumber = null
+    } else if (operator == "=") {
+      if (precNumber != null && isNumberClicked) {
+        let result = operate(precOperator, precNumber, currNumber);
+        if (result == "error")
+          isOperatorClicked = true;
+        display.textContent = show_result(isFloat, result);
+        
+        currNumber = result;
+        precNumber = null;
+        precOperator = null;
+      }
+    } else {
+      console.log("here");
+      process_calculations(operator);
+    }
+}
+
+
+function isOperator (operator) {
+  switch (operator) {
+    case '+':
+    case '-':
+    case '*':
+    case '/':
+    case '=':
+    case 'Enter':
+      return true;
+    default:
+      return false;
+  }
+}
+
+function removeElement() {
+    let currNumbers = display.textContent.split("");
+    currNumbers.pop();
+    display.textContent = currNumbers.join("");
+    currNumber = parseInput(isFloat, display.textContent);
+}
+
 
 const display = document.querySelector("#screen");
 const numbers = document.querySelectorAll(".number");
@@ -59,81 +127,75 @@ const operators = document.querySelectorAll(".operator");
 const dot = document.querySelector("#dot");
 const backspace = document.querySelector("#backspace");
 
-let is_operator_clicked = false;
-let is_number_cliked = false;
-let is_float = false;
-let curr_number = null;
-let prec_number = null;
-let prec_operator = null;
+let isOperatorClicked = false;
+let isNumberClicked = false;
+let isFloat = false;
+let currNumber = null;
+let precNumber = null;
+let precOperator = null;
 
 
-backspace.addEventListener("click", event => {
-  let curr_numbers = display.textContent.split("");
-  curr_numbers.pop();
-  display.textContent = curr_numbers.join("");
-  curr_number = parseInput(is_float, display.textContent);
+backspace.addEventListener("click", () => {
+  removeElement();
 })
 
 dot.addEventListener("click", event => {
-  if (!is_float)
+  if (!isFloat)
     display.textContent += event.target.textContent;
-  is_float = true;
+  isFloat = true;
 });
 
 
 numbers.forEach(element => {
   element.addEventListener("click", event => {
-    is_number_cliked = true;
-    if (is_operator_clicked) {
+    isNumberClicked = true;
+    if (isOperatorClicked) {
       display.textContent = "";
-      is_operator_clicked = false;
-      curr_number = null;
+      isOperatorClicked = false;
+      currNumber = null;
     }
     display.textContent += event.target.textContent;
-    curr_number = parseInput(is_float, display.textContent);
+    currNumber = parseInput(isFloat, display.textContent);
   });
 });
 
 operators.forEach(element => {
   element.addEventListener("click", event => {
     const operator = event.target.textContent;
-    
-    if (operator == "clear") {
-      display.textContent = "";
-      curr_number = null
-      prec_number = null
-    } else if (operator == "=") {
-      if (prec_number != null && is_number_cliked) {
-        let result = operate(prec_operator, prec_number, curr_number);
-        
-        display.textContent = show_result(is_float, result);
-        
-        curr_number = result;
-        prec_number = null;
-        prec_operator = null;
-      }
-    } else {
-      is_operator_clicked = true;
-      if (prec_number == null) {
-        prec_number = curr_number;
-        prec_operator = operator;
-      } else if (is_number_cliked) {
-        if (!prec_operator)
-          prec_operator = operator;
-        let result = operate(prec_operator, prec_number, curr_number);
-        if (result == "error") {
-          prec_number = null;
-          curr_number = null;
-        } else {
-          prec_number = result;
-          prec_operator = operator;
-        }
-        display.textContent = show_result(is_float, result);
-      } else {
-        prec_operator = operator;
-      }
-    }
-    is_float = false;
-    is_number_cliked = false;
+    process_operator(operator);
   });
 });
+
+document.addEventListener("keydown", (event) => {
+  if (Number.isInteger(parseInt(event.key))) {
+    isNumberClicked = true;
+    if (isOperatorClicked) {
+      display.textContent = "";
+      isOperatorClicked = false;
+      currNumber = null;
+    }
+    display.textContent += event.key;
+  } else if (event.key == '.' && !isFloat) {
+    isFloat = true;
+    display.textContent += event.key;
+  } else if (isOperator (event.key)){
+    console.log(event.key);
+    currNumber = parseInput(isFloat, display.textContent)
+    let operator = event.key;
+    if (operator == '/')
+      operator = '÷';
+    else if (operator == '*')
+      operator = '×';
+    else if (operator == "Enter")
+      operator = '=';
+    process_operator(operator);
+  } else if (event.key == "Backspace") {
+    removeElement();
+  }
+});
+
+
+// pour améliorer ce code ajouter des objets avec les différentes variable pour
+// rendre le code plus lisible et moins prone aux erreurs d'assignations de 
+// variables. Cependant, ici le but était de finir le plus rapidement possible
+// sans optimiser le code. Ce sera un exercice pour une prochaine fois...
